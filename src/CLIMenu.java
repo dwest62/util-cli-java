@@ -1,0 +1,207 @@
+import java.util.*;
+import java.util.function.Predicate;
+
+/**
+ * Represents a Command Line Interface (CLI) Menu.
+ */
+public class CLIMenu {
+
+    private final ArrayList<MenuItem> menuItems;
+
+    private final String welcome;
+
+    private final String prompt;
+    private final MenuItem exitOption;
+    private final InputErrorHandler invalidIntegerChoiceHandler;
+    private final InputErrorHandler outOfBoundsChoiceHandler;
+    private final String delimiter;
+
+    /**
+     * @param builder The Builder object containing menu configuration.
+     */
+    protected CLIMenu(Builder builder) {
+        this.menuItems = builder.menuItems;
+        this.welcome = builder.welcome;
+        this.prompt = builder.prompt;
+        this.exitOption = builder.exit;
+        this.invalidIntegerChoiceHandler = builder.invalidIntegerChoiceHandler;
+        this.outOfBoundsChoiceHandler = builder.outOfBoundsChoiceHandler;
+        this.delimiter = builder.delimiter;
+    }
+
+    /**
+     * Build a printable, formatted CLI menu from this menu.
+     *
+     * @return String containing a formatted CLI menu.
+     */
+    public String getFormattedMenu() {
+        StringBuilder sb = new StringBuilder(this.welcome).append("\n");
+        for (int i = 0; i < menuItems.size(); i++) {
+            sb.append(String.format("\t%d%s %s\n", i + 1, this.delimiter, menuItems.get(i)));
+        }
+        return sb.append(prompt).toString();
+    }
+
+
+    /**
+     * Runs the menu, prompting the user for input and executing the corresponding action until the exit option is
+     * chosen.
+     */
+    public void runMenu() {
+        Predicate<Integer> isNotExitOption = choice -> choice != menuItems.indexOf(exitOption);
+        Predicate<Integer> isValidIndex = choice -> choice > 0 && choice <= menuItems.size();
+        String prompt = this.getFormattedMenu();
+        TryParse<Integer> parser = TryParse.forInteger();
+        Rule<Integer> rule = new Rule<>(isValidIndex, outOfBoundsChoiceHandler);
+        
+        try (Scanner stdin = new Scanner(System.in)) {
+            int choice;
+            do {
+                System.out.print(getFormattedMenu());
+                
+                choice = InputHelper.requestValidInput(stdin, prompt, invalidIntegerChoiceHandler, parser, rule);
+
+                this.menuItems.get(choice - 1).action().run();
+            } while (isNotExitOption.test(choice));
+        }
+    }
+    
+    protected int getMenuSize() {
+        return this.menuItems.size();
+    }
+
+    /**
+     * Builder class for construction CLIMenu instances.
+     */
+    public static class Builder {
+        private final ArrayList<MenuItem> menuItems;
+        private String welcome = "Welcome to the menu!";
+        private String prompt = "Enter your choice: ";
+        private MenuItem exit =
+                new MenuItem("Exit", () -> System.out.println("Exiting the menu..."));
+        private InputErrorHandler invalidIntegerChoiceHandler;
+    
+        private InputErrorHandler outOfBoundsChoiceHandler;
+    
+        private String delimiter = ".";
+        /**
+         * Constructs a Builder with an ArrayList of MenuItem objects.
+         */
+        public Builder() {
+            this.menuItems = new ArrayList<>();
+        }
+    
+        /**
+         * Sets the welcome message for the menu.
+         *
+         * @param welcome The welcome message to display.
+         * @return The Builder instance for method chaining.
+         */
+        public Builder welcome(String welcome) {
+            this.welcome = welcome;
+            return this;
+        }
+    
+        /**
+         * Sets the prompt message for the menu.
+         *
+         * @param prompt The prompt message to display.
+         * @return The Builder instance for method chaining.
+         */
+        public Builder prompt(String prompt) {
+            this.prompt = prompt;
+            return this;
+        }
+    
+        /**
+         * Sets the delimiter for the menu item numbering.
+         *
+         * @param delimiter The delimiter to use.
+         * @return The Builder instance for method chaining.
+         */
+        public Builder delimiter(String delimiter) {
+            this.delimiter = delimiter;
+            return this;
+        }
+    
+        /**
+         * Adds a menu item to the menu.
+         *
+         * @param option The menu item to add.
+         * @return The Builder instance for method chaining.
+         */
+        public Builder addMenuItem(MenuItem option) {
+            this.menuItems.add(option);
+            return this;
+        }
+    
+        /**
+         * Adds a list of menu items to the menu.
+         *
+         * @param menuItems The menu items to add to the menu.
+         * @return The Builder instance for method chaining.
+         */
+        public Builder addMenuItems(List<MenuItem> menuItems) {
+            this.menuItems.addAll(menuItems);
+            return this;
+        }
+    
+        /**
+         * Sets the exit option for the menu. When the user inputs this options number, the menu loop will terminate,
+         * and the program will exit the menu.
+         *
+         * @param exit The MenuItem that represents the exit option.
+         * @return The Builder instance for method chaining.
+         */
+        public Builder exit(MenuItem exit) {
+            this.exit = exit;
+            return this;
+        }
+    
+        /**
+         * Sets the InputErrorHandler to be used when the user choice is out of bounds of the menu.
+         *
+         * @param outOfBoundsChoiceHandler The InputErrorHandler to be used when the user choice is out of bounds of
+         *                                 the menu.
+         * @return The Builder instance for method chaining.
+         */
+        public Builder outOfBoundsChoiceHandler(InputErrorHandler outOfBoundsChoiceHandler) {
+            this.outOfBoundsChoiceHandler = outOfBoundsChoiceHandler;
+            return this;
+        }
+    
+    
+        /**
+         * Sets the InputErrorHandler to be used when the user input is not parsable to an Integer.
+         *
+         * @param invalidIntegerChoiceHandler The InputErrorHandler to be used when the user choice is out of bounds
+         *                                    of the menu.
+         * @return The Builder instance for method chaining.
+         */
+        public Builder invalidIntegerChoiceHandler(InputErrorHandler invalidIntegerChoiceHandler) {
+            this.invalidIntegerChoiceHandler = invalidIntegerChoiceHandler;
+            return this;
+        }
+
+        /**
+         * Builds a CLIMenu instance using the current configuration.
+         *
+         * @return A new CLIMenu instance.
+         */
+        public CLIMenu build() {
+            this.addMenuItem(exit);
+            if(this.invalidIntegerChoiceHandler == null) {
+                this.invalidIntegerChoiceHandler =
+                    (input) -> System.out.println("Failed to parse input, please try again.");
+            }
+            if(this.outOfBoundsChoiceHandler == null) {
+                this.outOfBoundsChoiceHandler =
+                    (input) -> System.out.println(
+                        "Failed to run choice " + input + ", please enter a number between 1 and " + menuItems.size()
+                    );
+            }
+            return new CLIMenu(this);
+        }
+    }
+}
+
