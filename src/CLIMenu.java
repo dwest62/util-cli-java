@@ -16,6 +16,7 @@ public class CLIMenu {
     private final InputErrorHandler outOfBoundsChoiceHandler;
     private final String delimiter;
 
+    private final MenuItemFormatter menuItemFormatter;
     /**
      * @param builder The Builder object containing menu configuration.
      */
@@ -27,6 +28,7 @@ public class CLIMenu {
         this.invalidIntegerChoiceHandler = builder.invalidIntegerChoiceHandler;
         this.outOfBoundsChoiceHandler = builder.outOfBoundsChoiceHandler;
         this.delimiter = builder.delimiter;
+        this.menuItemFormatter = builder.menuItemFormatter;
     }
 
     /**
@@ -37,7 +39,7 @@ public class CLIMenu {
     public String getFormattedMenu() {
         StringBuilder sb = new StringBuilder(this.welcome).append("\n");
         for (int i = 0; i < menuItems.size(); i++) {
-            sb.append(String.format("\t%d%s %s\n", i + 1, this.delimiter, menuItems.get(i)));
+            sb.append(menuItemFormatter.format(i + 1, this.delimiter, String.valueOf(menuItems.get(i))));
         }
         return sb.append(prompt).toString();
     }
@@ -48,7 +50,7 @@ public class CLIMenu {
      * chosen.
      */
     public void runMenu() {
-        Predicate<Integer> isNotExitOption = choice -> choice != menuItems.indexOf(exitOption);
+        Predicate<Integer> isNotExitOption = choice -> choice != menuItems.indexOf(exitOption) + 1;
         Predicate<Integer> isValidIndex = choice -> choice > 0 && choice <= menuItems.size();
         String prompt = this.getFormattedMenu();
         TryParse<Integer> parser = TryParse.forInteger();
@@ -57,10 +59,7 @@ public class CLIMenu {
         try (Scanner stdin = new Scanner(System.in)) {
             int choice;
             do {
-                System.out.print(getFormattedMenu());
-                
                 choice = InputHelper.requestValidInput(stdin, prompt, invalidIntegerChoiceHandler, parser, rule);
-
                 this.menuItems.get(choice - 1).action().run();
             } while (isNotExitOption.test(choice));
         }
@@ -84,6 +83,10 @@ public class CLIMenu {
         private InputErrorHandler outOfBoundsChoiceHandler;
     
         private String delimiter = ".";
+        
+        private MenuItemFormatter menuItemFormatter =
+            (ordinal, delimiter, description) -> String.format("\t%d%s %s\n", ordinal, delimiter, description);
+        
         /**
          * Constructs a Builder with an ArrayList of MenuItem objects.
          */
@@ -155,6 +158,17 @@ public class CLIMenu {
          */
         public Builder exit(MenuItem exit) {
             this.exit = exit;
+            return this;
+        }
+    
+        /**
+         * Sets the formatter to be used to add custom menu item formatting.
+         *
+         * @param formatter The Formatter used to add custom menu item formatting.
+         * @return The Builder instance for method chaining.
+         */
+        public Builder menuItemFormatter(MenuItemFormatter formatter) {
+            this.menuItemFormatter = formatter;
             return this;
         }
     
