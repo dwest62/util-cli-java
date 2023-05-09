@@ -139,6 +139,18 @@ public class CLIMenu {
         }
     
         /**
+         * Creates a new menu item from the description and action inputs and adds the menu item to the menu
+         *
+         * @param description The description of the menu item.
+         * @param action The action to execute when the menu item is selected.
+         * @return The Builder instance for method chaining.
+         */
+        public Builder addMenuItem(String description, Runnable action) {
+            this.menuItems.add(new MenuItem(description, action));
+            return this;
+        }
+    
+        /**
          * Adds a list of menu items to the menu.
          *
          * @param menuItems The menu items to add to the menu.

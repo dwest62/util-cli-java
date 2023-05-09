@@ -1,43 +1,22 @@
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiFunction;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 class AutoSizeTablePrinter<T> implements TablePrinter<T> {
 
-	private enum AlignmentStrategy {
-		LEFT(Table.Column.Alignment.LEFT, (column, entry) -> entry + " ".repeat(column.getWidth() - entry.length())),
-		RIGHT(Table.Column.Alignment.RIGHT,
-			((column, entry) -> " ".repeat(column.getWidth() - entry.length()) + entry)),
-		CENTER(Table.Column.Alignment.CENTER, (column, entry) -> {
-			int leftSpaces = (column.getWidth() - entry.length()) / 2;
-			int rightSpaces = column.getWidth() - entry.length() - leftSpaces;
-			return  " ".repeat(leftSpaces) + entry + " ".repeat(rightSpaces);
-		});
-	private  Table.Column.Alignment alignment;
-	private BiFunction<Table.Column, String, String> strategy;
-	
-	AlignmentStrategy(Table.Column.Alignment alignment, BiFunction<Table.Column, String ,String> strategy) {
-		this.alignment = alignment;
-		this.strategy = strategy;
-	}
-	
-	public String align(Table.Column column, String entry) {
-		for (AutoSizeTablePrinter.AlignmentStrategy strategy : values())
-			if(strategy.alignment == alignment)
-				return this.strategy.apply(column, entry);
-		throw new IllegalArgumentException("No AlignmentStrategy for Alignment " + alignment);
-	}
-	public static AutoSizeTablePrinter.AlignmentStrategy fromAlignment(Table.Column.Alignment alignment)
-	{
-		for (AutoSizeTablePrinter.AlignmentStrategy strategy : values())
-			if(strategy.alignment == alignment)
-				return strategy;
-		throw new IllegalArgumentException("No AlignmentStrategy for Alignment " + alignment);
-	}
-}
+	private static final Map<Table.Column.Alignment, BiFunction<Table.Column, String, String>> ALIGNMENT_STRATEGY =
+		Map.of(
+			Table.Column.Alignment.LEFT, ((column, entry) -> entry + " ".repeat(column.getWidth() - entry.length())),
+			Table.Column.Alignment.RIGHT, ((column, entry) -> " ".repeat(column.getWidth() - entry.length()) + entry),
+			Table.Column.Alignment.CENTER, ((column, entry) -> {
+				int leftSpaces = (column.getWidth() - entry.length()) / 2;
+				int rightSpaces = column.getWidth() - entry.length() - leftSpaces;
+				return  " ".repeat(leftSpaces) + entry + " ".repeat(rightSpaces);
+			})
+		);
 	
 	private static void sizeColumn(Integer width, Table.Column column) {
 		column.setWidth(Math.max(column.getHeader().length(), width));
@@ -45,8 +24,6 @@ class AutoSizeTablePrinter<T> implements TablePrinter<T> {
 	
 	@Override
 	public String process(Table<T> table) {
-		
-		Collector<CharSequence, ?, String> join = Collectors.joining(" | ", "| ", " |");
 		autoSizeColumns(table);
 		List<Table.Column> columns = table.getColumns();
 		
@@ -76,12 +53,12 @@ class AutoSizeTablePrinter<T> implements TablePrinter<T> {
 		
 		
 		Stream<Integer> columns = IntStream.range(0, table.getColumns().size())
-			                          .mapToObj(col -> table.getEntries().stream()
-				                                           .map(table.getRowMapper()::mapRow)
-				                                           .mapToInt(row -> row.get(col).length())
-				                                           .max().orElse(0)
-			                          );
-		
+			.mapToObj(col -> table.getEntries().stream()
+			                   .map(table.getRowMapper()::mapRow)
+			                   .mapToInt(row -> row.get(col).length())
+			                   .max().orElse(0)
+			);
+
 		Stream<Table.Column> columnStream = table.getColumns().stream();
 		
 		StreamUtils.zipWith(
@@ -99,6 +76,7 @@ class AutoSizeTablePrinter<T> implements TablePrinter<T> {
 	}
 	
 	private String processCell(Table.Column column, String entry) {
-		return AutoSizeTablePrinter.AlignmentStrategy.fromAlignment(column.getAlignment()).align(column, entry);
+		return AutoSizeTablePrinter.ALIGNMENT_STRATEGY.getOrDefault(column.getAlignment(),
+			ALIGNMENT_STRATEGY.get(Table.Column.Alignment.LEFT)).apply(column, entry);
 	}
 }
