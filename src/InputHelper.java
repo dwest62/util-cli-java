@@ -2,7 +2,10 @@ import java.util.Optional;
 import java.util.Scanner;
 
 /**
- * Assists in requesting, parsing, and validating user input. 
+ * Assists in requesting, parsing, and validating user input.
+ *
+ * @author James West
+ * @version 1.0
  */
 public class InputHelper {
 	

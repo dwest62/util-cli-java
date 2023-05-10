@@ -1,5 +1,8 @@
 /**
  * Functional interface designed to be used by CLIMenu to provide custom MenuItem formatting.
+ *
+ * @author James West
+ * @version 1.0
  */
 @FunctionalInterface
 public interface MenuItemFormatter {

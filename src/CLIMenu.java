@@ -3,6 +3,9 @@ import java.util.function.Predicate;
 
 /**
  * Represents a Command Line Interface (CLI) Menu.
+ *
+ * @author James West
+ * @version 1.0
  */
 public class CLIMenu {
 
@@ -18,7 +21,7 @@ public class CLIMenu {
 
     private final MenuItemFormatter menuItemFormatter;
     /**
-     * @param builder The Builder object containing menu configuration.
+     * @param builder   The Builder object containing menu configuration.
      */
     protected CLIMenu(Builder builder) {
         this.menuItems = builder.menuItems;
@@ -49,20 +52,18 @@ public class CLIMenu {
      * Runs the menu, prompting the user for input and executing the corresponding action until the exit option is
      * chosen.
      */
-    public void runMenu() {
+    public void runMenu(Scanner scanner) {
         Predicate<Integer> isNotExitOption = choice -> choice != menuItems.indexOf(exitOption) + 1;
         Predicate<Integer> isValidIndex = choice -> choice > 0 && choice <= menuItems.size();
         String prompt = this.getFormattedMenu();
         TryParse<Integer> parser = TryParse.forInteger();
         Rule<Integer> rule = new Rule<>(isValidIndex, outOfBoundsChoiceHandler);
-        
-        try (Scanner stdin = new Scanner(System.in)) {
-            int choice;
-            do {
-                choice = InputHelper.requestValidInput(stdin, prompt, invalidIntegerChoiceHandler, parser, rule);
-                this.menuItems.get(choice - 1).action().run();
-            } while (isNotExitOption.test(choice));
-        }
+
+        int choice;
+        do {
+            choice = InputHelper.requestValidInput(scanner, prompt, invalidIntegerChoiceHandler, parser, rule);
+            this.menuItems.get(choice - 1).action().run();
+        } while (isNotExitOption.test(choice));
     }
     
     protected int getMenuSize() {
@@ -97,7 +98,7 @@ public class CLIMenu {
         /**
          * Sets the welcome message for the menu.
          *
-         * @param welcome The welcome message to display.
+         * @param welcome   The welcome message to display.
          * @return The Builder instance for method chaining.
          */
         public Builder welcome(String welcome) {
@@ -108,7 +109,7 @@ public class CLIMenu {
         /**
          * Sets the prompt message for the menu.
          *
-         * @param prompt The prompt message to display.
+         * @param prompt    The prompt message to display.
          * @return The Builder instance for method chaining.
          */
         public Builder prompt(String prompt) {
@@ -119,7 +120,7 @@ public class CLIMenu {
         /**
          * Sets the delimiter for the menu item numbering.
          *
-         * @param delimiter The delimiter to use.
+         * @param delimiter     The delimiter to use.
          * @return The Builder instance for method chaining.
          */
         public Builder delimiter(String delimiter) {
@@ -130,7 +131,7 @@ public class CLIMenu {
         /**
          * Adds a menu item to the menu.
          *
-         * @param option The menu item to add.
+         * @param option    The menu item to add.
          * @return The Builder instance for method chaining.
          */
         public Builder addMenuItem(MenuItem option) {
@@ -141,8 +142,8 @@ public class CLIMenu {
         /**
          * Creates a new menu item from the description and action inputs and adds the menu item to the menu
          *
-         * @param description The description of the menu item.
-         * @param action The action to execute when the menu item is selected.
+         * @param description   The description of the menu item.
+         * @param action        The action to execute when the menu item is selected.
          * @return The Builder instance for method chaining.
          */
         public Builder addMenuItem(String description, Runnable action) {
@@ -153,7 +154,7 @@ public class CLIMenu {
         /**
          * Adds a list of menu items to the menu.
          *
-         * @param menuItems The menu items to add to the menu.
+         * @param menuItems     The menu items to add to the menu.
          * @return The Builder instance for method chaining.
          */
         public Builder addMenuItems(List<MenuItem> menuItems) {
@@ -165,7 +166,7 @@ public class CLIMenu {
          * Sets the exit option for the menu. When the user inputs this options number, the menu loop will terminate,
          * and the program will exit the menu.
          *
-         * @param exit The MenuItem that represents the exit option.
+         * @param exit  The MenuItem that represents the exit option.
          * @return The Builder instance for method chaining.
          */
         public Builder exit(MenuItem exit) {
@@ -176,7 +177,7 @@ public class CLIMenu {
         /**
          * Sets the formatter to be used to add custom menu item formatting.
          *
-         * @param formatter The Formatter used to add custom menu item formatting.
+         * @param formatter     The Formatter used to add custom menu item formatting.
          * @return The Builder instance for method chaining.
          */
         public Builder menuItemFormatter(MenuItemFormatter formatter) {
@@ -187,7 +188,7 @@ public class CLIMenu {
         /**
          * Sets the InputErrorHandler to be used when the user choice is out of bounds of the menu.
          *
-         * @param outOfBoundsChoiceHandler The InputErrorHandler to be used when the user choice is out of bounds of
+         * @param outOfBoundsChoiceHandler  The InputErrorHandler to be used when the user choice is out of bounds of
          *                                 the menu.
          * @return The Builder instance for method chaining.
          */
@@ -200,7 +201,7 @@ public class CLIMenu {
         /**
          * Sets the InputErrorHandler to be used when the user input is not parsable to an Integer.
          *
-         * @param invalidIntegerChoiceHandler The InputErrorHandler to be used when the user choice is out of bounds
+         * @param invalidIntegerChoiceHandler   The InputErrorHandler to be used when the user choice is out of bounds
          *                                    of the menu.
          * @return The Builder instance for method chaining.
          */

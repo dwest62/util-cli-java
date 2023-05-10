@@ -1,3 +1,12 @@
+/**
+ * Represents a pair of objects of types A and B.
+ *
+ * @param <A> Type A.
+ * @param <B> Type B.
+ *
+ * @author James West
+ * @version 1.0
+ */
 public class Pair<A, B> {
 	private final A first;
 	private final B second;
@@ -7,11 +16,11 @@ public class Pair<A, B> {
 		this.second = second;
 	}
 	
-	public A getFirst() {
+	public A getA() {
 		return this.first;
 	}
 	
-	public B getSecond() {
+	public B getB() {
 		return this.second;
 	}
 }

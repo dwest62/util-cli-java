@@ -3,6 +3,9 @@ import java.util.function.Predicate;
 /**
  * A rule for validating an input value of type {@code T}.
  * @param <T> The type of input value to validate.
+ *
+ * @author James West
+ * @version 1.0
  */
 public class Rule<T> {
 	private final Predicate<T> predicate;

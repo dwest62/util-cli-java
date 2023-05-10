@@ -6,6 +6,8 @@ import java.util.function.Function;
  * object of type {@code T} will be returned, otherwise an empty Optional will be returned.
  *
  * @param <T> The type to which the String will be parsed.
+ * @author James West
+ * @version 1.0
  */
 public class TryParse<T>  {
 	private final Function<String, T> parser;
