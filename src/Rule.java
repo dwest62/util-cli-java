@@ -12,6 +12,8 @@ public class Rule<T> {
 	private final InputErrorHandler onErr;
 	
 	/**
+	 * Constructs a rule from the provided predicate and input error handler.
+	 *
 	 * @param predicate The predicate that tests the validity of an input.
 	 * @param onErr The error handler to be called when the input does not satisfy the rule.
 	 */

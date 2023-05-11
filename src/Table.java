@@ -232,6 +232,9 @@ public class Table<T, R extends RowMapper<T>> {
 	 * The Column represents a column in a table with a given width, header, and alignment.
 	 */
 	public static class Column {
+		/**
+		 * Represents the alignment of the column.
+		 */
 		public enum Alignment {
 			LEFT,
 			RIGHT,

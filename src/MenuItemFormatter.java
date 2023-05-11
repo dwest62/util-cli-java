@@ -7,6 +7,8 @@
 @FunctionalInterface
 public interface MenuItemFormatter {
 	/**
+	 * Menu item formatter function to be used to by CLIMenu to format a MenuItem
+	 *
 	 * @param index       The index of the MenuItem in the menu.
 	 * @param delimiter   The delimiter set for MenuItem numbering.
 	 * @param description The description of the MenuItem

@@ -21,7 +21,9 @@ public class CLIMenu {
 
     private final MenuItemFormatter menuItemFormatter;
     /**
-     * @param builder   The Builder object containing menu configuration.
+     * Protected constructor CLIMenu used by builder to create a new CLImenu instance.
+     *
+     * @param builder The Builder object containing menu configuration.
      */
     protected CLIMenu(Builder builder) {
         this.menuItems = builder.menuItems;
@@ -51,6 +53,8 @@ public class CLIMenu {
     /**
      * Runs the menu, prompting the user for input and executing the corresponding action until the exit option is
      * chosen.
+     *
+     * @param scanner The scanner used to get input from the user.
      */
     public void runMenu(Scanner scanner) {
         Predicate<Integer> isNotExitOption = choice -> choice != menuItems.indexOf(exitOption) + 1;
@@ -65,10 +69,7 @@ public class CLIMenu {
             this.menuItems.get(choice - 1).action().run();
         } while (isNotExitOption.test(choice));
     }
-    
-    protected int getMenuSize() {
-        return this.menuItems.size();
-    }
+
 
     /**
      * Builder class for construction CLIMenu instances.
