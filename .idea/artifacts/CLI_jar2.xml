@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="CLI:jar2">
+    <output-path>$PROJECT_DIR$/out/artifacts/CLI_jar2</output-path>
+    <root id="archive" name="utl-cli-src.jar">
+      <element id="module-source" name="CLI" />
+    </root>
+  </artifact>
+</component>
