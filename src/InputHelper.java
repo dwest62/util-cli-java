@@ -1,5 +1,9 @@
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * Assists in requesting, parsing, and validating user input.
@@ -35,6 +39,27 @@ public class InputHelper {
 				return resultOpt.get();
 			handleError.get().handle(input);
 		}
+	}
+	
+	@SafeVarargs
+	static <T> List<T> requestValidInputs(Scanner scanner, String prompt, InputErrorHandler handleParseError,
+	    TryParse<T> parser, Predicate<String> sentinel, Rule<T>... rules) {
+		List<T> results = new ArrayList<>();
+		
+		while(true) {
+			System.out.print(prompt);
+			String input = scanner.nextLine().trim();
+			if(sentinel.test(input))
+				break;
+			Optional<T> resultOpt = parser.parse(input);
+			Optional<InputErrorHandler> handleError = Optional.of(handleParseError);
+			
+			if (resultOpt.isPresent() && (handleError = getRuleErr(resultOpt.get(), rules)).isEmpty())
+				results.add(resultOpt.get());
+			else
+				handleError.get().handle(input);
+		}
+		return results;
 	}
 	
 	/**
