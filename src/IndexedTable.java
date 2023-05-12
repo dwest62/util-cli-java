@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
@@ -21,7 +22,16 @@ public class IndexedTable<T, R extends IndexedRowMapper<T>> extends Table<T, R> 
 	protected IndexedTable() {
 		super();
 	}
-	
+
+	/**
+	 * Constructs a new indexed table using the provided list of entries.
+	 *
+	 * @param entries The list of entries to be used by the table.
+	 */
+	protected IndexedTable(List<T> entries) {
+		super(entries);
+	}
+
 	/**
 	 * Uses the table's IndexedRowMapper to map the table's list of entries to their row representation, accounting
 	 * for the index of the row in the table.
@@ -80,7 +90,18 @@ public class IndexedTable<T, R extends IndexedRowMapper<T>> extends Table<T, R> 
 		 * @param indexColumn   The index column of the table.
 		 */
 		IndexedBuilder(R rowMapper, Column indexColumn) {
-			super(new IndexedTable<>(), rowMapper);
+			this(rowMapper, indexColumn, new ArrayList<>());
+		}
+
+		/**
+		 * Initializes a new indexed builder using the provided rowMapper, indexColumn, and entries.
+		 *
+		 * @param rowMapper The row mapper used by the table.
+		 * @param indexColumn The index column of the table.
+		 * @param entries The list of entries used by the table.
+		 */
+		IndexedBuilder(R rowMapper, Column indexColumn, List<T> entries) {
+			super(new IndexedTable<>(entries), rowMapper);
 			this.addColumn(indexColumn);
 		}
 		
