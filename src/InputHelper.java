@@ -16,7 +16,7 @@ public class InputHelper {
 	
 	/**
 	 * Prompts the user for input, validates the input, and returns the parsed result if it passes validation.
-	 * Executes the provided Runnable if the input is invalid.
+	 * Executes the provided Runnable if the input is invalid and re-prompts the user.
 	 *
 	 * @param scanner          The Scanner object to read user input.
 	 * @param prompt           The prompt to display to the user.
@@ -40,7 +40,23 @@ public class InputHelper {
 			handleError.get().handle(input);
 		}
 	}
-	
+	/**
+	 * Continuously prompts the user for input until the input matches the Sentinel predicate, validates
+	 * each input, and adds the parsed result to a list to be returned if it passes validation.
+	 * Executes the provided Runnable if the input is invalid and re-prompts the user.
+	 *
+	 * @param scanner          The Scanner object to read user input.
+	 * @param prompt           The prompt to display to the user.
+	 * @param handleParseError A Runnable to be executed if the input is unable to be parsed.
+	 * @param parser           A Function to parse the input.
+	 * @param sentinel         A Predicate that determines when the input request loop should stop. If the sentinel test
+	 *                         returns true for a given user input, the method will stop prompting the user and return
+	 *                         the collected results.
+	 * @param rules            Any rules which the input will be validated against.
+	 * @param <T>              The type of the parsed input.
+	 *
+	 * @return A new list of type T containing the objects added.
+	 */
 	@SafeVarargs
 	static <T> List<T> requestValidInputs(Scanner scanner, String prompt, InputErrorHandler handleParseError,
 	    TryParse<T> parser, Predicate<String> sentinel, Rule<T>... rules) {
