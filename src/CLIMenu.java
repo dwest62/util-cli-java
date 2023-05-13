@@ -153,6 +153,22 @@ public class CLIMenu {
         }
     
         /**
+         * Creates a new menu item from the description and action inputs and adds the menu item to the menu at the
+         * given ordinal.
+         *
+         * The ordinal is indexed at 1.
+         *
+         * @param ordinal       The ordinal at which the menu item will be placed. Indexed at 1.
+         * @param description   The description of the menu item.
+         * @param action        The action to execute when the menu item is selected.
+         * @return The Builder instance for method chaining.
+         */
+        public Builder addMenuItem(int ordinal, String description, Runnable action) {
+            this.menuItems.add(ordinal - 1, new MenuItem(description, action));
+            return this;
+        }
+    
+        /**
          * Adds a list of menu items to the menu.
          *
          * @param menuItems     The menu items to add to the menu.
